@@ -28,8 +28,6 @@ INSTALLED_APPS = [
     'accounts',
     'stories',
     'posts',
-    'notifications',
-    'massages',
     'corsheaders',
 ]
 
@@ -125,3 +123,5 @@ CORS_ALLOWED_ORIGINS =   'http://127.0.0.1:8000',
 
 
 CSRF_TRUSTED_ORIGINS = ["http://localhost:8000"]
+
+AUTH_USER_MODEL = 'accounts.User'

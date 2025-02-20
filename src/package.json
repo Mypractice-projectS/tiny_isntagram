@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "tailwindcss -i ./static/base.css -o ./static/home.css --watch"
+  "home": "tailwindcss -i ./static/base.css -o ./static/home.css --watch",
+  "login": "tailwindcss -i ./static/base.css -o ./static/login.css --watch"
 },
 
   "keywords": [],

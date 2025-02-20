@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <link href="{% static 'home.css' %}" rel="stylesheet">
     <meta charset="UTF-8">
@@ -8,186 +8,32 @@
     <title>Tiny Instagram</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary-dark: #1a1a1a;
-            --accent-dark: #ffffff;
-            --primary-light: #f8fafc;
-            --accent-light: #8b5cf6;
-            --text-dark: #ffffff;
-            --text-light: #1e293b;
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: var(--primary-dark);
-            --bg-secondary: #2d2d2d;
-            --text-primary: var(--text-dark);
-            --accent: var(--accent-dark);
-            --btn-text: var(--primary-dark);
-        }
-
-        [data-theme="light"] {
-            --bg-primary: var(--primary-light);
-            --bg-secondary: #e2e8f0;
-            --text-primary: var(--text-light);
-            --accent: var(--accent-light);
-            --btn-text: var(--text-dark);
-        }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-        }
-
-        .video-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: -1;
-            opacity: 0.15;
-        }
-
-        header, footer {
-            background: linear-gradient(
-                90deg, 
-                var(--bg-primary) 0%, 
-                var(--accent) 100%
-            );
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            position: relative;
-            z-index: 1;
-        }
-
-        .btn-theme {
-            background-color: var(--accent);
-            color: var(--btn-text);
-            padding: 8px 16px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0,0,0,0.1);
-            font-weight: 500;
-        }
-
-        .btn-theme:hover {
-            filter: brightness(90%);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .text-accent {
-            color: var(--accent);
-            opacity: 0.9;
+            background-color: #f8fafc;
+            color: #1e293b;
+            padding: 50px;
         }
     </style>
 </head>
-
-<body class="flex flex-col min-h-screen">
-    <!-- Video Background -->
-    <video autoplay loop muted class="video-background">
-        <source src="{% static 'instagram-intro.mp4' %}" type="video/mp4">
-        <img src="{% static 'fallback-image.jpg' %}" alt="background" class="video-background">
-    </video>
-
-    <!-- Header -->
-    <header class="py-6">
-        <div class="container mx-auto flex justify-between items-center px-4">
-            <div class="text-2xl font-bold text-primary">Tiny Instagram</div>
-            <div class="flex space-x-4 ml-auto">
-                <a href="#" class="btn-theme">Login</a>
-                <a href="#" class="btn-theme">Sign Up</a>
-                <button onclick="toggleTheme()" class="btn-theme">🌙</button>
-            </div>
+<body>
+    <!-- Header Section -->
+   <header class="fixed top-0 left-0 right-0 w-full bg-white shadow-md flex justify-between items-center px-6 py-4 z-50">
+        <h1 class="text-2xl font-bold text-gray-800">Tiny Instagram</h1>
+        <div class="space-x-3">
+            <a href="/login" class="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all">Login</a>
+            <a href="/signup" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">Sign Up</a>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-4 py-8 relative z-10">
-        <!-- محتوای اصلی صفحه -->
+    <main class="mt-64 text-center">
+        <p class="welcome-text text-4xl font-bold">Welcome to TinyInstagram, a modern and lightweight social media platform.</p>
+
+    
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            A modern and lightweight social media platform designed for seamless connections and joyful moments.
+        </p>
     </main>
-
-    <!-- Footer -->
-    <footer class="py-6 bg-gray-800 text-white">
-        <div class="container mx-auto flex flex-col items-start space-y-2 px-4">
-            <div class="text-accent">
-                <h3 class="font-bold">About</h3>
-                <p class="text-sm opacity-75">
-                    Welcome to TinyInstagram, a modern and lightweight social media platform...
-                </p>
-            </div>
-            <div class="text-accent">
-                <h3 class="font-bold">Contact Us</h3>
-                <p class="text-sm opacity-75">
-                    📧 Email: support@tinyinstagram.com<br>
-                    🌍 Follow Us: @TinyInstagram
-                </p>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        function toggleTheme() {
-            const html = document.documentElement;
-            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        }
-
-        function updateThemeIcon(theme) {
-            const icon = theme === 'dark' ? '🌙' : '☀️';
-            document.querySelector('.btn-theme:last-child').innerHTML = icon;
-        }
-
-        // Initialize theme
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        updateThemeIcon(savedTheme);
-    </script>
-    <script>
-        const API_BASE_URL = "http://127.0.0.1:8000/api/";
-    
-        async function login() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-    
-            const response = await fetch(API_BASE_URL + "users/login/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            });
-    
-            const data = await response.json();
-            if (response.ok) {
-                alert("Login Successful!");
-                localStorage.setItem("token", data.token);
-            } else {
-                document.getElementById("login-message").innerText = data.detail || "Login Failed!";
-            }
-        }
-    
-        async function signup() {
-            const username = document.getElementById('signup-username').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-    
-            const response = await fetch(API_BASE_URL + "users/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, email, password })
-            });
-    
-            const data = await response.json();
-            if (response.ok) {
-                alert("Signup Successful! Please log in.");
-            } else {
-                document.getElementById("signup-message").innerText = data.detail || "Signup Failed!";
-            }
-        }
-    </script>
-    
-</body> 
+</body>
 </html>

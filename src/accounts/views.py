@@ -8,6 +8,9 @@ from django.shortcuts import render
 def home(request):
     return render(request, "home.html")
 
+def login(request):
+    return render(request, "login.html")
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
