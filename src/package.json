@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
   "home": "tailwindcss -i ./static/base.css -o ./static/home.css --watch",
-  "login": "tailwindcss -i ./static/base.css -o ./static/login.css --watch"
+  "login": "tailwindcss -i ./static/base.css -o ./static/login.css --watch",
+  "sign-up": "tailwindcss -i ./static/base.css -o ./static/signup.css --watch"
 },
 
   "keywords": [],

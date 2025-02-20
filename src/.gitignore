@@ -383,9 +383,10 @@ pyrightconfig.json
 
 node_modules
 
-*.json text eol=lf
-*.css text eol=lf
+
 *.js text eol=lf
 * text=auto
+*.css text eol=lf
+*.json text eol=lf
 
 # End of https://www.toptal.com/developers/gitignore/api/django,python,pycharm
