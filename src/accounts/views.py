@@ -1,10 +1,26 @@
 from django.shortcuts import render
+from django.views import View
 
-def home(request):
-    return render(request, "home.html")
+class HomeView(View):
+    def get(self, request):
+        return render(request, "home.html")
 
-def login(request):
-    return render(request, "login.html")
+class LoginView(View):
+    def get(self, request):
+        return render(request, "login.html")
 
-def Sign_up(request):
-    return render(request, "signup.html")
+class SignUpView(View):
+    def get(self, request):
+        return render(request, "signup.html")
+
+class ProfileView(View):
+    def get(self, request):
+        return render(request, "profile.html")
+
+class OTPView(View):
+    def get(self, request):
+        return render(request, "otp.html")
+
+class OTPView(View):
+    def get(self, request):
+        return render(request, "otp.html")

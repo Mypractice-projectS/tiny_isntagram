@@ -30,8 +30,10 @@ class Profile(models.Model):
     full_name = models.CharField(max_length=255)
     username = models.CharField(max_length=255)
     bio = models.TextField()
-    profile_img = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    profile_img = models.ImageField(upload_to='images/', null=True, blank=True)
     gender = models.CharField(max_length=10)
     age = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    

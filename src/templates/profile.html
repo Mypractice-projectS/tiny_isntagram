@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Profile</title>
+    <!-- اضافه کردن Tailwind CSS از طریق CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-2">
+            <h1 class="text-2xl font-extrabold text-gray-800">Tiny Instagram</h1>
+        </div>
+    </header>
+
+    <!-- Profile Section -->
+    <div class="bg-white py-8 shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex items-start space-x-8">
+                <!-- Profile Picture -->
+                <img src="{% static 'images/myprofile.jpg' %}" alt="profile" class="w-32 h-32 rounded-full border-4 border-gray-200 shadow-lg">
+                <!-- Profile Info -->
+                <div class="flex-1">
+                    <div class="flex items-center space-x-6">
+                        <h1 class="text-3xl font-bold text-gray-800">Username</h1>
+                        <button class="bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-blue-600 transition">Follow</button>
+                        <button class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-300 transition">Message</button>
+                    </div>
+                    <!-- Stats -->
+                    <div class="flex space-x-8 mt-4">
+                        <div class="text-center">
+                            <span class="text-2xl font-bold text-gray-800">120</span>
+                            <span class="block text-gray-500 text-sm">Posts</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-2xl font-bold text-gray-800">1.2M</span>
+                            <span class="block text-gray-500 text-sm">Followers</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-2xl font-bold text-gray-800">456</span>
+                            <span class="block text-gray-500 text-sm">Following</span>
+                        </div>
+                    </div>
+                    <!-- Bio -->
+                    <p class="text-gray-600 text-lg mt-4">
+                        A short bio about the user. This text can be a brief description about the user.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Posts Section -->
+    <div class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Posts</h2>
+        <div class="grid grid-cols-3 gap-4">
+            <!-- Post 1 -->
+            <img src="{% static 'images/post1.jpg' %}" alt="post1" class="w-full h-48 object-cover rounded-lg shadow-md">
+            <!-- Post 2 -->
+            <img src="{% static 'images/post2.jpg' %}" alt="post2" class="w-full h-48 object-cover rounded-lg shadow-md">
+            <!-- Post 3 -->
+            <img src="{% static 'images/post3.jpg' %}" alt="post3" class="w-full h-48 object-cover rounded-lg shadow-md">
+            <!-- Post 4 -->
+            <img src="{% static 'images/post4.jpg' %}" alt="post4" class="w-full h-48 object-cover rounded-lg shadow-md">
+            <!-- Post 5 -->
+            <img src="{% static 'images/post5.jpg' %}" alt="post5" class="w-full h-48 object-cover rounded-lg shadow-md">
+            <!-- Post 6 -->
+            <img src="{% static 'images/post6.jpg' %}" alt="post6" class="w-full h-48 object-cover rounded-lg shadow-md">
+        </div>
+    </div>
+</body>
+</html>
