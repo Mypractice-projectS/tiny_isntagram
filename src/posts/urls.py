@@ -1,7 +1,12 @@
 from django.urls import path
-from .views import postView,exploreView
+from .views import PostView, ExploreView, FollowingView, FollowerView
+from django.views.generic import TemplateView
+
+
 
 urlpatterns = [
-    path("mypost/" , postView.as_view() , name='post'),
-    path("explore/" , exploreView.as_view() , name='post'),
+    path('post/', PostView.as_view(), name='post'),
+    path('explore/', ExploreView.as_view(), name='explore'),
+    path('following/', FollowingView.as_view(), name='following'),
+    path('follower/', FollowerView.as_view(), name='follower'),
 ]

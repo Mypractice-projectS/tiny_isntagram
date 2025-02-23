@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'stories',
     'posts',
     'corsheaders',
+    'phonenumber_field',
 ]
 
 MIDDLEWARE = [

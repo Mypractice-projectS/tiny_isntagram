@@ -1,10 +1,15 @@
 from django.shortcuts import render
-from django.views import View
-#Create your views here.
-class postView(View):
-    def get(self, request):
-        return render(request, "mypost.html")
+from django.urls import path
+from django.views.generic import TemplateView
 
-class exploreView(View):
-    def get(self, request):
-        return render(request, "explore.html")
+class PostView(TemplateView):
+    template_name = 'mypost.html'
+
+class ExploreView(TemplateView):
+    template_name = 'explore.html'
+
+class FollowingView(TemplateView):
+    template_name = 'following.html'
+
+class FollowerView(TemplateView):
+    template_name = 'follower.html'
