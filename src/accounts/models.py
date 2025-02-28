@@ -1,10 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.validators import RegexValidator
-from .managers import UserManager
+from .managers import UserManager   
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True,verbose_name="Email")
-    username = models.CharField(max_length=50, unique=True, verbose_name="Username")
+    username = models.CharField(max_length=150, unique=True, verbose_name="Username")
+    #https://regex101.com/
     phone_regex = RegexValidator(regex=r'^(0|0098|\+98)?9(0[1-5]|[1-3]\d|2[0-2]|9[0-9])\d{7}$',
                                  message='The entered phone number format is incorrect.')
     phone = models.CharField(validators=[phone_regex], max_length=11, blank=True, verbose_name="Phone number")
@@ -31,7 +32,12 @@ class Profile(models.Model):
     username = models.CharField(max_length=255)
     bio = models.TextField()
     profile_img = models.ImageField(upload_to='images/', null=True, blank=True)
-    gender = models.CharField(max_length=10)
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('other', 'Other'),
+]
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, verbose_name="Gender")
     age = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
