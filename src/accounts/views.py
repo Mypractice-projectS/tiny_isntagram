@@ -9,13 +9,15 @@ from .serializers import UserRegisterSerializer
 
 
 
+
 class UserRegisterView(APIView):
     def post(self, request):
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            # send_otp_email(user.email, user.otp)  
-            return Response({'message': ' OTP sent to email.'}, status=status.HTTP_201_CREATED)
+            user = serializer.create(serializer.validated_data)
+            send_otp_email(user.email, user.otp)
+            return Response({'message': 'OTP sent to email'}, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -27,7 +29,7 @@ class LoginView(TemplateView):
      template_name = "login.html"
 
 # class SignupView(TemplateView):
-#     template_name = "signup"
+#      template_name = "signup"
 
 
 class ProfileView(TemplateView):
