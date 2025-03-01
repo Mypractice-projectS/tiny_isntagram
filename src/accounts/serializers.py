@@ -2,29 +2,34 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from .models import User,OTP,Profile
 
+
+
 class UserRegisterSerializer(serializers.ModelSerializer):
-    password2 = serializers.CharField(write_only=True, required=True)
+    password2 = serializers.CharField(write_only=True,required=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'phone', 'password', 'password2']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['username', 'email','phone','password','password2']
+        extra_kwargs = {'password':{'write_only':True}}
+
 
     def create(self, validated_data):
-        validated_data.pop('password2')
+        del validated_data['password2']
         return User.objects.create_user(**validated_data)
+
 
     def validate_username(self, value):
         if value == 'password':
-            raise serializers.ValidationError('Username cannot be "password"')
+            raise serializers.ValidationError('username can not be password')
         return value
 
     def validate(self, data):
+
         if data['password'] != data['password2']:
-            raise serializers.ValidationError('Passwords must match')
+            raise serializers.ValidationError('passwords must match')
         return data
-
-
+    
+    
 class UserLoginSerializer(serializers.Serializer):
     username_or_email = serializers.CharField()
     password = serializers.CharField(write_only=True)
