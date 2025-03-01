@@ -13,7 +13,7 @@
         <div class="container mx-auto px-4 flex justify-between items-center">
             <div class="flex items-center">
                 <!-- Your Profile Picture -->
-                <img src="{% static 'path_to_your_profile_image.jpg' %}" alt="Your Profile" class="w-10 h-10 rounded-full">
+                <img src="{% static 'myprofile.jpg' %}" alt="Your Profile" class="w-10 h-10 rounded-full">
                 <a href="#" class="text-lg font-semibold ml-3">My Profile</a>
             </div>
             <!-- Add any other header elements here -->
@@ -23,30 +23,9 @@
     <!-- Main Section (Posts) -->
     <main class="container mx-auto px-4 py-8">
         <h2 class="text-lg font-semibold mb-4">Recent Posts</h2>
-        <div id="posts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Posts will be displayed here -->
+        <div id="posts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">   
+           
         </div>
     </main>
-
-    <script>
-        // Sample data for posts
-        const posts = [
-            { id: 1, userId: 1, image: "https://via.placeholder.com/300", caption: "This is a sample post." },
-            { id: 2, userId: 2, image: "https://via.placeholder.com/300", caption: "This is another post." },
-            { id: 3, userId: 3, image: "https://via.placeholder.com/300", caption: "This is yet another post." }
-        ];
-
-        // Display posts
-        const postsContainer = document.getElementById('posts');
-        posts.forEach(post => {
-            const postElement = document.createElement('div');
-            postElement.className = 'bg-white rounded-lg shadow-md overflow-hidden';
-            postElement.innerHTML = ` 
-                <img src="${post.image}" alt="Post ${post.id}" class="w-full h-48 object-cover">
-                <p class="p-4 text-sm">${post.caption}</p>
-            `;
-            postsContainer.appendChild(postElement);
-        });
-    </script>
 </body>
 </html>
