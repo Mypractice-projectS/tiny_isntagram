@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.validators import RegexValidator
 from .managers import UserManager   
+from django.conf import settings
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True,verbose_name="Email")
     username = models.CharField(max_length=50, unique=True, verbose_name="Username")
@@ -11,6 +12,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = UserManager()
@@ -25,12 +27,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 #   OTP
 
 class OTP(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     email = models.EmailField(unique=True, verbose_name="Email")
     otp = models.CharField(max_length=6, verbose_name="OTP Code")
-    expires_at = models.DateTimeField(verbose_name="Expires at")
-    is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    is_verified = models.BooleanField(default=False)
     def __str__(self):
         return f'{self.email}, ( {self.otp} ),{self.created_at}'
 
