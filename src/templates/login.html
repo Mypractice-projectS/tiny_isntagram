@@ -8,16 +8,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            padding-top: 64px; /* اضافه کردن padding-top برای جلوگیری از همپوشانی با هدر */
+            padding-top: 64px;
         }
         header {
             position: fixed;
             top: 0;
             width: 100%;
-            z-index: 1000; /* اطمینان از اینکه هدر بالای همه عناصر دیگر قرار گیرد */
+            z-index: 1000;
             display: flex;
-            justify-content: center; /* متن را به وسط هدر می‌چسباند */
-            align-items: center; /* متن را به صورت عمودی وسط‌چین می‌کند */
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
@@ -27,13 +27,53 @@
     </header>
     <div class="bg-white p-8 rounded-lg shadow-lg w-80 mt-8">
         <h2 class="text-2xl font-semibold text-center mb-4">Login</h2>
-        <form class="flex flex-col">
-            <label class="text-gray-700 mb-1">Username</label>
-            <input type="text" class="p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your username">
-            <label class="text-gray-700 mb-1">Password</label>
-            <input type="password" class="p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your password">
-            <button class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Login</button>
+        <form class="flex flex-col" id="loginForm">
+            {% csrf_token %}
+            <label class="text-gray-700 mb-1" for="username">Username or Email</label>
+            <input id="username" name="username_or_email" type="text" class="p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your username or email" required>
+
+            <label class="text-gray-700 mb-1" for="password">Password</label>
+            <input id="password" name="password" type="password" class="p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your password" required>
+
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Login</button>
         </form>
     </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const username_or_email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const csrfToken = getCSRFToken();
+
+            try {
+                const response = await fetch('/api/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ username_or_email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Login successful!');
+                    window.location.href = '/dashboard/';
+                } else {
+                    alert(data?.detail || 'Login failed. Please check your credentials.');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        });
+
+        function getCSRFToken() {
+            const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+            return cookie ? cookie.split('=')[1] : '';
+        }
+    </script>
 </body>
 </html>
