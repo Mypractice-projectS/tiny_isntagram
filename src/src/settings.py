@@ -137,4 +137,4 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'johnfakh223@gmail.com'
 EMAIL_HOST_PASSWORD = "vegt anpa mnth vvrh"
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'TinyInstagram <<EMAIL>>'
+DEFAULT_FROM_EMAIL = 'TinyInstagram <johnfakh223@gmail.com>'
