@@ -98,7 +98,7 @@
             })
             .then(data => {
                 alert("Registration successful! OTP sent to email.");
-                window.location.href = "{% url 'otp' %}"; // انتقال به صفحه OTP
+                window.location.href = "{% url 'otp' %}"; 
             })
             .catch(error => {
                 alert("Error: " + error.message);
