@@ -61,7 +61,7 @@
 
                 if (response.ok) {
                     alert('Login successful!');
-                    window.location.href = '/dashboard/';
+                    window.location.href = "{% url 'profile' %}";  <!-- هدایت به صفحه پروفایل -->
                 } else {
                     alert(data?.detail || 'Login failed. Please check your credentials.');
                 }
