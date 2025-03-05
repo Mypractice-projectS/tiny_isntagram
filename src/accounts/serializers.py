@@ -1,6 +1,11 @@
-from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import User,OTP,Profile
+from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
+from accounts.models import User, OTP
+from rest_framework_simplejwt.tokens import RefreshToken
+import random
+from django.utils import timezone
+
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -11,53 +16,65 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'phone', 'password', 'password2']
         extra_kwargs = {'password': {'write_only': True}}
 
-    def validate(self, data):
-        if data['password'] != data['password2']:
-            raise serializers.ValidationError({'password2': 'Passwords must match'})
-        return data
-
     def create(self, validated_data):
-        validated_data.pop('password2')
+        del validated_data['password2']
         user = User.objects.create_user(**validated_data)
-        user.is_active = False
+        user.set_password(validated_data['password'])
         user.save()
         return user
 
+    def validate_username(self, value):
+        if value == 'password':
+            raise serializers.ValidationError('Username cannot be "password".')
+        return value
 
-class UserLoginSerializer(serializers.Serializer):
+    def validate(self, data):
+
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError('Passwords must match.')
+        return data
+
+
+
+
+class UserLoginSerializer(serializers.ModelSerializer):
     username_or_email = serializers.CharField()
     password = serializers.CharField(write_only=True)
+    access_token = serializers.CharField(max_length=255, read_only=True)
+    refresh_token = serializers.CharField(max_length=255, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username_or_email', 'password', 'access_token', 'refresh_token']
 
     def validate(self, data):
         username_or_email = data.get('username_or_email')
         password = data.get('password')
 
-        user = User.objects.filter(username=username_or_email).first() or \
-               User.objects.filter(email=username_or_email).first()
+        # پیدا کردن کاربر با نام کاربری یا ایمیل
+        user = (User.objects.filter(username=username_or_email).first() or
+                User.objects.filter(email=username_or_email).first())
 
         if not user:
-            raise serializers.ValidationError('User not found.')
+            raise AuthenticationFailed('User not found.')
 
         if not user.is_verified:
-            raise serializers.ValidationError('User is not verified.')
+            raise AuthenticationFailed('User not verified.')
 
-        authenticated_user = authenticate(username=user.username, password=password)
-
+        # احراز هویت با استفاده از نام کاربری و رمز عبور
+        authenticated_user = authenticate(username=username_or_email, password=password)
         if not authenticated_user:
-            raise serializers.ValidationError('Invalid credentials.')
+            raise AuthenticationFailed('Invalid credentials, try again.')
 
-        data['user'] = authenticated_user
-        return data
+        # ایجاد و ارسال توکن‌های دسترسی و تجدید
+        refresh = RefreshToken.for_user(authenticated_user)
+        return {
+            'username_or_email': authenticated_user.username,
+            'access_token': str(refresh.access_token),
+            'refresh_token': str(refresh),
+        }
 
-
-class OTPSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OTP
-        fields = '__all__'
-
-
-
-
+# اگر نیاز به سریالایزر برای پروفایل دارید، به این صورت می‌توانید آن را تعریف کنید:
 # class ProfileSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Profile
