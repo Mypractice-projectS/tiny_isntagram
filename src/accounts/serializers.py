@@ -1,10 +1,18 @@
+import random
+from django.utils import timezone
+from datetime import timedelta
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
-from accounts.models import User, OTP
-from rest_framework_simplejwt.tokens import RefreshToken
-import random
-from django.utils import timezone
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.encoding import smart_str, smart_bytes, force_str
+from django.urls import reverse
+from rest_framework_simplejwt.exceptions import TokenError
+from accounts.email import send_normal_email
+from rest_framework_simplejwt.tokens import RefreshToken,Token
+from accounts.models import User, Profile,OTP
 
 
 
@@ -37,45 +45,73 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 
+
 class UserLoginSerializer(serializers.ModelSerializer):
     username_or_email = serializers.CharField()
     password = serializers.CharField(write_only=True)
-    access_token = serializers.CharField(max_length=255, read_only=True)
-    refresh_token = serializers.CharField(max_length=255, read_only=True)
+    access_token = serializers.CharField(max_length=255,read_only=True)
+    refresh_token = serializers.CharField(max_length=255,read_only=True)
 
     class Meta:
         model = User
-        fields = ['username_or_email', 'password', 'access_token', 'refresh_token']
+        fields = ['username_or_email','password','access_token','refresh_token']
 
     def validate(self, data):
         username_or_email = data.get('username_or_email')
         password = data.get('password')
 
-        # پیدا کردن کاربر با نام کاربری یا ایمیل
         user = (User.objects.filter(username=username_or_email).first() or
                 User.objects.filter(email=username_or_email).first())
 
-        if not user:
-            raise AuthenticationFailed('User not found.')
+        if user and User.is_verified:
+            authenticated_user = authenticate(username=username_or_email, password=password)
+            if not authenticated_user:
+                raise AuthenticationFailed('Invalid credentials try again.')
+            user_tokens = user.tokens()
 
-        if not user.is_verified:
-            raise AuthenticationFailed('User not verified.')
 
-        # احراز هویت با استفاده از نام کاربری و رمز عبور
-        authenticated_user = authenticate(username=username_or_email, password=password)
-        if not authenticated_user:
-            raise AuthenticationFailed('Invalid credentials, try again.')
+            return {
+                'username_or_email': user.username,
+                'access_token': str(user_tokens.get('access')),
+                'refresh_token': str(user_tokens.get('refresh')),
 
-        # ایجاد و ارسال توکن‌های دسترسی و تجدید
-        refresh = RefreshToken.for_user(authenticated_user)
-        return {
-            'username_or_email': authenticated_user.username,
-            'access_token': str(refresh.access_token),
-            'refresh_token': str(refresh),
-        }
+            }
 
-# اگر نیاز به سریالایزر برای پروفایل دارید، به این صورت می‌توانید آن را تعریف کنید:
-# class ProfileSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Profile
-#         fields = '__all__'
+class LogoutUserSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField()
+
+    default_error_messages = {
+        'bad_token':('Token is invalid or has expired.')
+    }
+
+    def validate(self, attrs):
+        self.token = attrs.get('refresh_token')
+        return attrs
+
+    def save(self, **kwargs):
+        try:
+            token = RefreshToken(self.token)
+            token.blacklist()
+        except TokenError:
+            return self.fail('bad_token')
+
+
+
+
+
+
+
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username','phone']
+
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    # avatar = serializers.SerializerMethodField()
+    class Meta:
+        model = Profile
+        fields = ('user', 'avatar', 'bio', 'first_name', 'last_name', 'age')
