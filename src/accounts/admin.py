@@ -1,8 +1,7 @@
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib import admin
 from .forms import UserChangeForm,UserCreationForm
-from .models import User, OTP
-
+from .models import User,OTP,Profile
 
 # Register your models here.
 
@@ -10,7 +9,7 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
     ordering = ['email']
-    list_display = ['email', 'phone','username','is_active','is_staff','created_at' ,'is_verified']
+    list_display = ['email', 'phone','username','is_active','is_staff','is_verified','created_at']
     search_fields = ['username']
     readonly_fields = ['last_login']
     filter_horizontal = ['groups','user_permissions']
@@ -36,8 +35,17 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.register(User,UserAdmin)
 
+
 class OTPAdmin(admin.ModelAdmin):
     model = OTP
-    list_display = ['user','otp','email']
+    list_display = ['user','otp']
 
 admin.site.register(OTP,OTPAdmin)
+
+from django.contrib import admin
+from .models import Profile
+
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('id','first_name','last_name')  # مطمئن شوید که این فیلدها یا متدها معتبر هستند
+
+admin.site.register(Profile, ProfileAdmin)

@@ -10,9 +10,10 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import smart_str, smart_bytes, force_str
 from django.urls import reverse
 from rest_framework_simplejwt.exceptions import TokenError
+
 from accounts.email import send_normal_email
 from rest_framework_simplejwt.tokens import RefreshToken,Token
-from accounts.models import User, Profile,OTP
+from accounts.models import User, Profile
 
 
 
@@ -29,6 +30,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         user.set_password(validated_data['password'])
         user.save()
+
         return user
 
     def validate_username(self, value):
@@ -42,6 +44,73 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Passwords must match.')
         return data
 
+
+
+# class UserRegisterSerializer(serializers.ModelSerializer):
+#     password2 = serializers.CharField(write_only=True,required=True)
+#
+#     class Meta:
+#         model = User
+#         fields = ['username', 'email','phone','password','password2']
+#         extra_kwargs = {'password':{'write_only':True}}
+#
+#
+#     def create(self, validated_data):
+#         del validated_data['password2']
+#         user = User.objects.create_user(**validated_data)
+#         user.generate_otp()
+#         user.set_password(validated_data['password'])
+#         user.save()
+#         return user
+#
+#     # def create(self, validated_data):
+#     #     user = User.objects.create(
+#     #         username=validated_data['username'],
+#     #         email=validated_data['email']
+#     #     )
+#     #     user.set_password(validated_data['password'])
+#     #     user.generate_otp()
+#     #     return user
+#     #
+#
+#
+#     def validate_username(self, value):
+#         if value == 'password':
+#             raise serializers.ValidationError('username can not be password')
+#         return value
+#
+#     def validate(self, data):
+#
+#         if data['password'] != data['password2']:
+#             raise serializers.ValidationError('passwords must match')
+#         return data
+
+
+# class UserVerifyOTPSerializer(serializers.Serializer):
+#     email = serializers.EmailField()
+#     otp = serializers.CharField(max_length=6)
+#
+#     def validate(self, data):
+#         try:
+#             otp_instance = OTP.objects.get(email=data['email'], otp=data['otp'])
+#
+#             if timezone.now() > otp_instance.expires_at:
+#                 raise serializers.ValidationError({'error': 'OTP has expired.'})
+#
+#             return data
+#
+#         except OTP.DoesNotExist:
+#             raise serializers.ValidationError({'error': 'Invalid OTP.'})
+#
+#
+# class ResendOTPSerializer(serializers.Serializer):
+#     email = serializers.EmailField()
+#
+#     def validate_email(self, value):
+#
+#         if not OTP.objects.filter(email=value).exists():
+#             raise serializers.ValidationError("email does not exist.")
+#         return value
 
 
 
@@ -77,6 +146,66 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
             }
 
+#                      PasswordResetRequestSerializer
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    class Meta:
+        fields = ['email']
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        if User.objects.filter(email=email).exists():
+            user = User.objects.get(email=email)
+            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+            request = self.context.get('request')
+            site_domain = get_current_site(request).domain
+            relative_link = reverse('password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
+            abslink = f'http://{site_domain}{relative_link}'
+            email_body = f'Hi use the link below to reset your password \n {abslink}'
+            data = {
+                'email_body': email_body,
+                'email_subject': 'Reset your password',
+                'to_email':user.email,
+            }
+            send_normal_email(data)
+
+        return super().validate(attrs)
+
+#                 SetNewPasswordSerializer
+
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+    uidb64 = serializers.CharField(write_only=True)
+    token = serializers.CharField(write_only=True)
+
+    class Meta:
+        fields = ['password', 'confirm_password', 'uidb64', 'token']
+
+    def validate(self, attrs):
+        try:
+            token = attrs.get('token')
+            uidb64 = attrs.get('uidb64')
+            password = attrs.get('password')
+            confirm_password = attrs.get('confirm_password')
+
+            user_id = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=user_id)
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                raise AuthenticationFailed('reset link is invalid or has expired.')
+            if password != confirm_password:
+                raise AuthenticationFailed('password and confirm_password do not match.')
+            user.set_password(password)
+            user.save()
+            return user
+
+        except Exception as e:
+            raise AuthenticationFailed('link is invalid or has expired.')
+
+#
 class LogoutUserSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
 
@@ -110,8 +239,39 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
 
 
+
+
 class ProfileSerializer(serializers.ModelSerializer):
-    # avatar = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
-        fields = ('user', 'avatar', 'bio', 'first_name', 'last_name', 'age')
+        fields = ('id', 'avatar', 'bio', 'first_name', 'last_name', 'age')
+
+    def create(self, validated_data):
+        # گرفتن درخواست و کاربر از context
+        request = self.context.get('request')
+        if not request or not request.user:
+            raise serializers.ValidationError("Request object or user is missing in context")
+
+        # اضافه کردن کاربر به داده‌های پروفایل
+        validated_data['user'] = request.user
+        profile = super().create(validated_data)  # ایجاد پروفایل
+        profile.save()
+        # بررسی و لاگ کردن اینکه آیا id پروفایل برگشت داده می‌شود
+        if not profile.id:
+            raise serializers.ValidationError("Profile created but no ID returned.")
+
+        return profile  # `id` به طور خودکار توسط Django به پروفایل اضافه می‌شود
+
+    def get_avatar(self, obj):
+        request = self.context.get('request')
+        if obj.avatar:
+            avatar_url = obj.avatar.url
+            if request:
+                return request.build_absolute_uri(avatar_url)  # ساخت URL کامل برای تصویر
+            return avatar_url
+        return None
+
+class VerifyOTPSerializer(serializers.Serializer):
+    otp = serializers.CharField(max_length=6, required=True)
