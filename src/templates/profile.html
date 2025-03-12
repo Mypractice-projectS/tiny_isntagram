@@ -1,75 +1,89 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram Profile</title>
-    <!-- اضافه کردن Tailwind CSS از طریق CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100">
-    <!-- Header -->
     <header class="bg-white shadow-md">
         <div class="container mx-auto px-4 py-2">
             <h1 class="text-2xl font-extrabold text-gray-800">Tiny Instagram</h1>
         </div>
     </header>
 
-    <!-- Profile Section -->
     <div class="bg-white py-8 shadow-md">
         <div class="container mx-auto px-4">
             <div class="flex items-start space-x-8">
-                <!-- Profile Picture -->
-                <img src="{% static 'images/myprofile.jpg' %}" alt="profile" class="w-32 h-32 rounded-full border-4 border-gray-200 shadow-lg">
-                <!-- Profile Info -->
+                <img id="profile-avatar" src="{% static 'images/default.jpg' %}" alt="profile" class="w-32 h-32 rounded-full border-4 border-gray-200 shadow-lg">
                 <div class="flex-1">
                     <div class="flex items-center space-x-6">
-                        <h1 class="text-3xl font-bold text-gray-800">Username</h1>
+                        <h1 id="profile-username" class="text-3xl font-bold text-gray-800">Username</h1>
                         <button class="bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-blue-600 transition">Follow</button>
                         <button class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-300 transition">Message</button>
                     </div>
-                    <!-- Stats -->
+
                     <div class="flex space-x-8 mt-4">
                         <div class="text-center">
-                            <span class="text-2xl font-bold text-gray-800">120</span>
+                            <span id="post-count" class="text-2xl font-bold text-gray-800">0</span>
                             <span class="block text-gray-500 text-sm">Posts</span>
                         </div>
                         <div class="text-center">
-                            <a href= "{% url 'follower' %}" class="text-2xl font-bold text-gray-800 hover:text-gray-900">1.2M</a>
+                            <a href="{% url 'follower' %}" id="follower-count" class="text-2xl font-bold text-gray-800 hover:text-gray-900">0</a>
                             <span class="block text-gray-500 text-sm">Followers</span>
                         </div>
                         <div class="text-center">
-                            <a href="{% url 'following' %}"class="text-2xl font-bold text-gray-800 hover:text-gray-900">456</a>
+                            <a href="{% url 'following' %}" id="following-count" class="text-2xl font-bold text-gray-800 hover:text-gray-900">0</a>
                             <span class="block text-gray-500 text-sm">Following</span>
                         </div>
-                    </div> <!-- این تگ بسته شد -->
-                    <!-- Bio -->
-                    <p class="text-gray-600 text-lg mt-4">
-                        A short bio about the user. This text can be a brief description about the user.
-                    </p>
-                </div> <!-- این تگ بسته شد -->
-            </div> <!-- این تگ بسته شد -->
-        </div> <!-- این تگ بسته شد -->
-    </div> <!-- این تگ بسته شد -->
+                    </div>
 
-    <!-- Posts Section -->
-    <div class="container mx-auto px-4 py-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Posts</h2>
-        <div class="grid grid-cols-3 gap-4">
-            <!-- Post 1 -->
-            <img src="{% static 'images/post1.jpg' %}" alt="post1" class="w-full h-48 object-cover rounded-lg shadow-md">
-            <!-- Post 2 -->
-            <img src="{% static 'images/post2.jpg' %}" alt="post2" class="w-full h-48 object-cover rounded-lg shadow-md">
-            <!-- Post 3 -->
-            <img src="{% static 'images/post3.jpg' %}" alt="post3" class="w-full h-48 object-cover rounded-lg shadow-md">
-            <!-- Post 4 -->
-            <img src="{% static 'images/post4.jpg' %}" alt="post4" class="w-full h-48 object-cover rounded-lg shadow-md">
-            <!-- Post 5 -->
-            <img src="{% static 'images/post5.jpg' %}" alt="post5" class="w-full h-48 object-cover rounded-lg shadow-md">
-            <!-- Post 6 -->
-            <img src="{% static 'images/post6.jpg' %}" alt="post6" class="w-full h-48 object-cover rounded-lg shadow-md">
+                    <p id="profile-bio" class="text-gray-600 text-lg mt-4">User bio will be here.</p>
+
+                    <div class="mt-6">
+                        <a href="{% url 'creat_profile' %}" class="bg-green-500 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-green-600 transition">Edit Profile</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const profileUrl = `/api/profile/{{ id }}/`;  // URL API برای پروفایل
+
+            fetch(profileUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer {{ request.user.auth_token }}`,  // اطمینان حاصل کنید که توکن درست است
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // بررسی داده‌های دریافتی از API
+            
+                if (data) {
+                    // بروزرسانی عکس پروفایل و یوزرنیم
+                    document.getElementById('profile-avatar').src = data.avatar ? `/media/${data.avatar}` : '{% static "images/default.jpg" %}';
+                    document.getElementById('profile-username').textContent = `${data.first_name} ${data.last_name}` || 'Username';  // یوزرنیم
+                    document.getElementById('profile-bio').textContent = data.bio || 'User bio will be here.';  // بیو
+            
+                    // مقداردهی پست‌ها، فالورها و فالووینگ
+                    document.getElementById('post-count').textContent = data.post_count || 0;
+                    document.getElementById('follower-count').textContent = data.follower_count || 0;
+                    document.getElementById('following-count').textContent = data.following_count || 0;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading profile:', error);
+            });
+        });
+    </script>
+
 </body>
 </html>
